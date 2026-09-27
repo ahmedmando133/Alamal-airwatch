@@ -57,7 +57,14 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{scroll-behavior:smooth}
-body{margin:0;color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;background:var(--ground)}
+body{
+  margin:0;color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;
+  background-image: url('assets/animated background.svg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
 .app{max-width:1200px;margin:0 auto;padding-inline:16px;padding-block:14px 110px;display:flex;flex-direction:column;gap:22px;font-family:var(--f-body)}
 h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.2}
 h2{font-size:1.3rem;font-weight:700;color:var(--navy)}
@@ -522,7 +529,7 @@ ar:{
   opts:{rhinitis:"حساسية الأنف",asthma:"ربو",both:"حساسية أنف مع ربو",child:"طفل (أقل من ١٢)",adult:"بالغ",senior:"كبير السن (+٦٥)",good:"جيدة",partial:"جزئية",poor:"ضعيفة",low:"داخل المنزل غالباً",mid:"تنقل عادي",high:"عمل أو رياضة في الخارج"},
   personal:"مستوى الخطر الشخصي",
   cardTitle:"نشرة خمسة أيام للمشاركة",cardSub:"صورة PNG لمجموعات واتساب وشاشات الصيدليات · المدينة المحددة",saveCard:"حفظ PNG",copyText:"نسخ نص واتساب",
-  copied:"تم نسخ النص",copyManual:"انسخ النص يدوياً",saved:"تم الحفظ",cancelled:"تم الإلغاء",noSave:"الحفظ غير متاح هنا",
+  copied:"تم نسخ النص",copyManual:"انسخ النص يدوياً",saved:"تم الحفظ",cancelled:"تم الإلغاء",noSave:"Saving isn't available here",
   cardHead:"النشرة الطبية الجوية · الحساسية والربو",cardDisc:"للتوعية العامة. التزم بالعلاج الموصوف من طبيبك.",cardStorm:"تحذير أحمر: عاصفة غبار متوقعة",
   waTitle:"النشرة الطبية الجوية · مجموعة الأمل",waSign:"— مجموعة الأمل الطبية",
   methodTitle:"المنهجية والمرجعية العلمية",
@@ -800,7 +807,7 @@ const ADV={
    if(cond!=="rhinitis"&&l>=1)x.push("تأكد من وجود بخاخ الإسعاف وأنه غير منتهي الصلاحية.");
    if(age==="child")x.push("للأطفال: أبلغ المدرسة بخطة الربو وتجنّب اللعب في الخارج وقت الغبار.");
    if(cond!=="asthma"&&l>=1)x.push("ابدأ بخاخ الأنف الموصوف بانتظام قبل أيام الذروة لتحقيق أفضل فعالية.");
-   if(!x.length)x.push("استمر على العلاج المعتاد وراقب النشرة يومياً.");return x;}
+   if(!x.length)x.push("استمر على العلاج المعتاد وراقب النشرة يومياًارات.");return x;}
   }
 };
 const adv=()=>ADV[state.lang];
@@ -864,18 +871,14 @@ function drawImgFit(g,im,x,y,w,h){
   g.drawImage(im,x+(w-iw)/2,y+(h-ih)/2,iw,ih);
 }
 
-// دالة متطورة جديدة تقوم بالقص المباشر للمساحات البيضاء ورسم الصورة داخل مربع محدد بدقة
-function drawImgCropFit(g, im, x, y, w, h, cropX=0, cropY=0) {
+// دالة رسم دقيقة جداً ومقيدة بمربع آمن لا يمكن أن تتجاوزه
+function drawImgStrictBox(g, im, boxX, boxY, boxW, boxH) {
   if(!im||!im.complete||!im.naturalWidth) return;
-  const sx = im.naturalWidth * cropX;
-  const sy = im.naturalHeight * cropY;
-  const sw = im.naturalWidth * (1 - 2 * cropX);
-  const sh = im.naturalHeight * (1 - 2 * cropY);
-  const r = Math.min(w / sw, h / sh);
-  const iw = sw * r;
-  const ih = sh * r;
-  // رسم الصورة بالمقاس المطلوب داخل الحدود الصارمة X و Y
-  g.drawImage(im, sx, sy, sw, sh, x + (w - iw)/2, y + (h - ih)/2, iw, ih);
+  const r = Math.min(boxW / im.naturalWidth, boxH / im.naturalHeight);
+  const iw = im.naturalWidth * r;
+  const ih = im.naturalHeight * r;
+  // توسيط الصورة داخل المربع المخصص بدقة تامة منعاً لأي تداخل
+  g.drawImage(im, boxX + (boxW - iw) / 2, boxY + (boxH - ih) / 2, iw, ih);
 }
 
 function drawCard(){
@@ -917,27 +920,28 @@ function drawCard(){
   });
   
   // ==========================================
-  // توزيع وحجم الصور بدون تداخل مع استخدام القص الآمن للفراغات البيضاء
+  // مساحة الأدوية المحمية تماماً (منع التداخل مع الجدول العلوي والشريط السفلي)
   // ==========================================
-  const py = top + colH + 20; // المسافة أسفل الأعمدة (لا يتداخل مع الجدول أبداً)
-  const itemW = 220; // عرض صارم لكل صورة (يستحيل أن تدخل على الصور المجاورة)
-  const itemH = 220; // ارتفاع صارم (يستحيل أن تتداخل مع الجدول فوق أو البانر تحت)
+  const py = top + colH + 25; // بداية آمنة تحت الجدول مباشرة
+  const slotW = 210;          // عرض مخصص لكل صورة
+  const slotH = 175;          // ارتفاع آمن يمنع اللمس نهائياً
+  const totalW = 4 * slotW;
+  const startX = (W - totalW) / 5; // توزيع فواصل مسافات متساوية واحترافية
 
-  // توزيع الإحداثيات الأفقية بشكل مثالي ومتساوٍ
-  const getX = (i) => 40 + i * (itemW + 40);
+  const getX = (i) => startX + i * (slotW + startX);
 
-  // نستخدم الدالة الذكية لقص نسبة مئوية من الجوانب البيضاء الفارغة حول علب الأدوية ورسمهم بحد أقصى للحجم
-  drawImgCropFit(g, imgs.nasonex,   getX(0), py, itemW, itemH, 0.28, 0.18);
-  drawImgCropFit(g, imgs.aerius,    getX(1), py, itemW, itemH, 0.25, 0.18);
-  drawImgCropFit(g, imgs.aerius2,   getX(2), py, itemW, itemH, 0.00, 0.00);
-  drawImgCropFit(g, imgs.singulair, getX(3), py, itemW, itemH, 0.12, 0.10);
-
-  // رسم الإعلان اللي تحت (Banner) بمسافة آمنة تحت الأدوية
-  const by = py + itemH + 30; 
+  // إرجاع علبة Singulair لحجمها وشكلها الطبيعي المتناسق مع الحفاظ على مقاسات الأدوية الأخرى
+  drawImgStrictBox(g, imgs.nasonex,   getX(0), py, slotW, slotH);
+  drawImgStrictBox(g, imgs.aerius,    getX(1), py, slotW, slotH);
+  drawImgStrictBox(g, imgs.aerius2,   getX(2), py, slotW, slotH);
+  drawImgStrictBox(g, imgs.singulair, getX(3), py, slotW, slotH);
+  
+  // رسم الإعلان اللي تحت (Banner) بمسافة آمنة ومرتبة
+  const by = py + slotH + 20; 
   g.fillStyle="#fff";roundRect(g,60,by,W-120,86,20);g.fill();
   drawImgFit(g,imgs.banner,80,by+8,W-160,70);
   
-  g.fillStyle="rgba(255,255,255,.7)";g.font=`500 22px ${fb}`;g.fillText(t("cardDisc"),W/2,H-40);
+  g.fillStyle="rgba(255,255,255,.7)";g.font=`500 22px ${fb}`;g.fillText(t("cardDisc"),W/2,H-35);
 }
 
 function drawSticker(g,x,y,w,h){
