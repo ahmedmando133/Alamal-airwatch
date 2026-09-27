@@ -64,16 +64,16 @@ body{
   overflow-x:hidden;
 }
 
-/* خلفية الفيديو أو الـ SVG المتحرك لتغطي الموقع بالكامل وتكون في الخلفية */
-.bg-animation {
+/* تنسيق خلفية الفيديو المتحرك */
+.bg-video {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
+  object-fit: cover;
   z-index: -1;
   pointer-events: none;
-  object-fit: cover;
 }
 
 .app{max-width:1200px;margin:0 auto;padding-inline:16px;padding-block:14px 110px;display:flex;flex-direction:column;gap:22px;font-family:var(--f-body);position:relative;z-index:1}
@@ -322,8 +322,10 @@ details.method summary{cursor:pointer;font-family:var(--f-display);font-size:1.1
 
 </head>
 <body>
-<!-- الخلفية المتحركة SVG -->
-<object data="assets/animated background.svg" type="image/svg+xml" class="bg-animation"></object>
+<!-- خلفية الفيديو المتحرك بصيغة MP4 -->
+<video autoplay muted loop playsinline class="bg-video">
+  <source src="assets/background.mp4" type="video/mp4">
+</video>
 
 <div class="app" id="app" lang="en" dir="ltr">
   <header class="mast">
@@ -932,11 +934,11 @@ function drawCard(){
   });
   
   // ==========================================
-  // تعديل إحداثيات ومقاسات الأدوية بدقة تامة لتجنب أي تداخل
+  // إحداثيات ومقاسات الأدوية المحمية تماماً
   // ==========================================
-  const py = top + colH + 15; // مسافة آمنة تحت الجدول
+  const py = top + colH + 15; 
   const slotW = 210;          
-  const slotH = 160;          // تصغير الارتفاع قليلاً لضمان عدم ملامسة البانر السفلي
+  const slotH = 160;          
   const totalW = 4 * slotW;
   const startX = (W - totalW) / 5; 
 
