@@ -59,13 +59,24 @@
 html{scroll-behavior:smooth}
 body{
   margin:0;color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;
-  background-image: url('assets/animated background.svg');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
+  background:var(--ground);
+  position:relative;
+  overflow-x:hidden;
 }
-.app{max-width:1200px;margin:0 auto;padding-inline:16px;padding-block:14px 110px;display:flex;flex-direction:column;gap:22px;font-family:var(--f-body)}
+
+/* خلفية الفيديو أو الـ SVG المتحرك لتغطي الموقع بالكامل وتكون في الخلفية */
+.bg-animation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+  object-fit: cover;
+}
+
+.app{max-width:1200px;margin:0 auto;padding-inline:16px;padding-block:14px 110px;display:flex;flex-direction:column;gap:22px;font-family:var(--f-body);position:relative;z-index:1}
 h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.2}
 h2{font-size:1.3rem;font-weight:700;color:var(--navy)}
 h3{font-size:1rem;font-family:var(--f-body);font-weight:700}
@@ -311,6 +322,9 @@ details.method summary{cursor:pointer;font-family:var(--f-display);font-size:1.1
 
 </head>
 <body>
+<!-- الخلفية المتحركة SVG -->
+<object data="assets/animated background.svg" type="image/svg+xml" class="bg-animation"></object>
+
 <div class="app" id="app" lang="en" dir="ltr">
   <header class="mast">
     <div class="topbar">
@@ -807,7 +821,7 @@ const ADV={
    if(cond!=="rhinitis"&&l>=1)x.push("تأكد من وجود بخاخ الإسعاف وأنه غير منتهي الصلاحية.");
    if(age==="child")x.push("للأطفال: أبلغ المدرسة بخطة الربو وتجنّب اللعب في الخارج وقت الغبار.");
    if(cond!=="asthma"&&l>=1)x.push("ابدأ بخاخ الأنف الموصوف بانتظام قبل أيام الذروة لتحقيق أفضل فعالية.");
-   if(!x.length)x.push("استمر على العلاج المعتاد وراقب النشرة يومياًارات.");return x;}
+   if(!x.length)x.push("استمر على العلاج المعتاد وراقب النشرة يومياً.");return x;}
   }
 };
 const adv=()=>ADV[state.lang];
@@ -871,13 +885,11 @@ function drawImgFit(g,im,x,y,w,h){
   g.drawImage(im,x+(w-iw)/2,y+(h-ih)/2,iw,ih);
 }
 
-// دالة رسم دقيقة جداً ومقيدة بمربع آمن لا يمكن أن تتجاوزه
 function drawImgStrictBox(g, im, boxX, boxY, boxW, boxH) {
   if(!im||!im.complete||!im.naturalWidth) return;
   const r = Math.min(boxW / im.naturalWidth, boxH / im.naturalHeight);
   const iw = im.naturalWidth * r;
   const ih = im.naturalHeight * r;
-  // توسيط الصورة داخل المربع المخصص بدقة تامة منعاً لأي تداخل
   g.drawImage(im, boxX + (boxW - iw) / 2, boxY + (boxH - ih) / 2, iw, ih);
 }
 
@@ -920,24 +932,23 @@ function drawCard(){
   });
   
   // ==========================================
-  // مساحة الأدوية المحمية تماماً (منع التداخل مع الجدول العلوي والشريط السفلي)
+  // تعديل إحداثيات ومقاسات الأدوية بدقة تامة لتجنب أي تداخل
   // ==========================================
-  const py = top + colH + 25; // بداية آمنة تحت الجدول مباشرة
-  const slotW = 210;          // عرض مخصص لكل صورة
-  const slotH = 175;          // ارتفاع آمن يمنع اللمس نهائياً
+  const py = top + colH + 15; // مسافة آمنة تحت الجدول
+  const slotW = 210;          
+  const slotH = 160;          // تصغير الارتفاع قليلاً لضمان عدم ملامسة البانر السفلي
   const totalW = 4 * slotW;
-  const startX = (W - totalW) / 5; // توزيع فواصل مسافات متساوية واحترافية
+  const startX = (W - totalW) / 5; 
 
   const getX = (i) => startX + i * (slotW + startX);
 
-  // إرجاع علبة Singulair لحجمها وشكلها الطبيعي المتناسق مع الحفاظ على مقاسات الأدوية الأخرى
   drawImgStrictBox(g, imgs.nasonex,   getX(0), py, slotW, slotH);
   drawImgStrictBox(g, imgs.aerius,    getX(1), py, slotW, slotH);
   drawImgStrictBox(g, imgs.aerius2,   getX(2), py, slotW, slotH);
   drawImgStrictBox(g, imgs.singulair, getX(3), py, slotW, slotH);
   
-  // رسم الإعلان اللي تحت (Banner) بمسافة آمنة ومرتبة
-  const by = py + slotH + 20; 
+  // رسم الإعلان اللي تحت (Banner)
+  const by = py + slotH + 15; 
   g.fillStyle="#fff";roundRect(g,60,by,W-120,86,20);g.fill();
   drawImgFit(g,imgs.banner,80,by+8,W-160,70);
   
