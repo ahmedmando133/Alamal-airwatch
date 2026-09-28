@@ -70,6 +70,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,g[data-city]:focus
 [lang="ar"] .eyebrow{letter-spacing:0;font-size:.78rem}
 .ltr{direction:ltr}
 
+/* ---------- top bar + hero band ---------- */
 .mast{display:flex;flex-direction:column;gap:0;border-radius:24px;overflow:hidden;box-shadow:var(--shadow-lg);background:var(--surface)}
 .topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:14px 22px;flex-wrap:wrap;background:var(--surface);border-bottom:1px solid var(--line)}
 .sticker{display:inline-flex;align-items:center;gap:12px;color:var(--navy)}
@@ -103,16 +104,19 @@ button:focus-visible,select:focus-visible,input:focus-visible,g[data-city]:focus
 .kpi small{font-size:.72rem;opacity:.85}
 .mast .btn{color:var(--navy)}
 
+/* ---------- alert ---------- */
 .alert{display:flex;gap:14px;align-items:flex-start;border-radius:16px;padding:14px 18px;background:var(--surface);border:1px solid var(--line);border-inline-start:6px solid var(--amal-red);box-shadow:var(--shadow)}
 .alert svg{flex:none;color:var(--amal-red)}
 .alert strong{color:var(--amal-red)}
 .alert p{font-size:.93rem}
 
+/* ---------- section headers ---------- */
 .section-title{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;padding-inline-start:14px;position:relative}
 .section-title::before{content:"";position:absolute;inset-inline-start:0;top:.25em;width:5px;height:1.1em;border-radius:3px;background:linear-gradient(var(--amal-2),var(--navy))}
 .section-title h2{font-size:1.5rem;font-weight:800}
 .section-title p{color:var(--ink-3);font-size:.86rem}
 
+/* ---------- overview city cards ---------- */
 .overview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
 @media (max-width:900px){.overview{grid-template-columns:1fr}}
 .ccard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s}
@@ -149,6 +153,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,g[data-city]:focus
 .dcol .rp{width:calc(100% - 8px);border-radius:10px;padding:4px 2px;font-size:.64rem;font-weight:700;line-height:1.2;margin-top:4px}
 .dcol .rp span{display:block;font-size:.82rem}
 
+/* ---------- panels ---------- */
 .grid-main{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:18px;align-items:start}
 @media (max-width:900px){.grid-main{grid-template-columns:1fr}}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:16px;box-shadow:var(--shadow)}
@@ -441,6 +446,7 @@ const PRODUCTS=[
 ];
 const FACE=["😊","😐","😷","🚨"];
 
+/* ============ i18n ============ */
 const T={
 en:{
   mastEyebrow:"Al Amal Medical Group · Medical Weather Bulletin",
@@ -816,7 +822,7 @@ function renderAudience(){
   $("audMeta").textContent=cname(cityOf(state.city))+" · "+dayLabel(state.day,d.date);
   const drivers=ix.drivers.length?`<p class="muted">${t("drivers")}: ${ix.drivers.join(state.lang==="ar"?"، ":", ")}</p>`:"";
   const A=adv();let html="";
-  if(state.aud==="patient")html=drivers+`<ul class="advice">${A.patient(d,ix).map(li).join("")}</ul>`;
+  if(state.aud==="patient")html=drivers+`<ul class="advice">${A.patient(d,ix).map(li).join("")}</ul>`+productShowcase();
   if(state.aud==="pharmacist")html=drivers+`<ul class="advice">${A.pharmacist(d,ix).map(li).join("")}</ul>`+productShowcase();
   if(state.aud==="physician")html=drivers+`<ul class="advice">${A.physician(d,ix).map(li).join("")}</ul>`+productShowcase();
   $("audBody").innerHTML=html;
