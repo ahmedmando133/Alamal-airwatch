@@ -64,7 +64,7 @@ html{scroll-behavior:smooth}
 
 body {
   margin: 0; color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.55;
-  background: transparent; /* Makes background fully transparent to show video */
+  background: transparent; 
   position: relative; overflow-x: hidden;
 }
 
@@ -77,13 +77,13 @@ body {
 .bg-overlay {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
   z-index: -1; pointer-events: none;
-  background: rgba(244, 247, 251, 0.3); /* Bright soft daylight tint */
+  background: rgba(244, 247, 251, 0.3); 
   transition: background 0.6s ease;
 }
 
 @media (prefers-color-scheme: dark) {
   .bg-overlay {
-    background: rgba(10, 21, 38, 0.82); /* Dark tint at night to make white text pop */
+    background: rgba(10, 21, 38, 0.82); 
   }
 }
 
@@ -123,23 +123,24 @@ button:focus-visible,select:focus-visible,input:focus-visible,g[data-city]:focus
 .btn.primary:hover{color:#fff;filter:brightness(1.06)}
 .btn.sm{padding:5px 11px;font-size:.78rem;border-radius:10px}
 
-/* Hero Section (Preserved Solid Gradient & White text) */
-.hero{position:relative;padding:34px 30px 60px;color:#fff;background:linear-gradient(110deg,var(--navy-deep) 0%,var(--navy) 45%,#1b5fb4 100%);overflow:hidden;display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:center}
+/* Hero Section */
+.hero{position:relative;padding:34px 30px 60px;overflow:hidden;display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:center}
 @media (max-width:760px){.hero{grid-template-columns:1fr;padding:26px 22px 54px}}
-.hero .eyebrow{color:rgba(255,255,255,.7)}
-.hero h1{font-size:clamp(2rem,5vw,3rem);font-weight:800;margin-top:6px;color:#fff;font-family:"Cairo",sans-serif}
+.hero .eyebrow{color:var(--navy); font-weight: 800;}
+.hero h1{font-size:clamp(2rem,5vw,3rem);font-weight:800;margin-top:6px;color:#fff;font-family:"Cairo",sans-serif; text-shadow: 0 2px 10px rgba(0,0,0,0.15);}
 .hero h1 span{color:#9ecbff}
-.hero .tag{color:rgba(255,255,255,.85);font-size:1rem;max-width:58ch;margin-top:10px}
+.hero .tag{color:var(--navy);font-size:1rem;max-width:58ch;margin-top:10px; font-weight: 700;}
 .hero .waves{position:absolute;left:0;right:0;bottom:-2px;width:100%;height:56px;display:block}
 .hero .orb{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(158,203,255,.45),transparent 65%);filter:blur(30px);pointer-events:none}
 .hero .orb.a{width:420px;height:420px;inset:-200px -120px auto auto}
 .hero .orb.b{width:300px;height:300px;inset:auto auto -180px -80px}
 .hero-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;position:relative;z-index:1}
 .kpi{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:16px;padding:12px 14px;backdrop-filter:blur(8px)}
-.kpi span{display:block;font-size:.7rem;opacity:.8;text-transform:uppercase;letter-spacing:.08em;color:#fff}
+.kpi span{display:block;font-size:.7rem;opacity:.9;text-transform:uppercase;letter-spacing:.08em;color:var(--navy); font-weight:800}
 [lang="ar"] .kpi span{letter-spacing:0;font-size:.76rem}
-.kpi b{display:block;font-family:var(--f-mono);font-size:1.5rem;font-weight:500;line-height:1.2;margin-top:2px;color:#fff}
-.kpi small{font-size:.72rem;opacity:.85;color:#fff}
+.kpi b{display:block;font-family:var(--f-mono);font-size:1.5rem;font-weight:800;line-height:1.2;margin-top:2px;color:var(--navy)}
+.kpi small{font-size:.72rem;opacity:.9;color:var(--navy); font-weight:700}
+.mast .btn{color:var(--navy)}
 
 .alert{display:flex;gap:14px;align-items:flex-start;border-radius:16px;padding:14px 18px;border-inline-start:6px solid var(--amal-red);box-shadow:var(--shadow)}
 .alert svg{flex:none;color:var(--amal-red)}
@@ -916,7 +917,7 @@ function drawCard(){
     rows.forEach((r,k)=>{const y=top+284+k*38;g.textAlign=ar?"right":"left";g.fillStyle="#4a5f66";g.font=`600 19px ${fb}`;g.fillText(r[0],ar?x+colW-18:x+18,y);g.textAlign=ar?"left":"right";g.fillStyle="#10242c";g.font="500 21px 'IBM Plex Mono', monospace";g.fillText(String(r[1]),ar?x+18:x+colW-18,y);});
     g.textAlign="center";
     const pillBox=(y,label,val)=>{const l=lvl(val);g.fillStyle=BG[l];roundRect(g,x+12,y,colW-24,70,14);g.fill();g.strokeStyle=COL[l];g.lineWidth=2;g.stroke();g.lineWidth=1;g.fillStyle="#4a5f66";g.font=`600 16px ${fb}`;g.fillText(label,x+colW/2,y+26);g.fillStyle=COL[l];g.font=`800 22px ${fb}`;g.fillText(FACE[l]+" "+t("levels")[l],x+colW/2,y+56);};
-    pillBox(top+390,t("allergyShort"),ix.allergy);pillBox(top+470,t("asthmaShort"),ix.asthma);
+    pillBox(top+390,t("allergyShort"),ix.allergy);pillBox(top+470,t("asthmaRisk"),ix.asthma);
   });
   
   g.fillStyle="rgba(255,255,255,.7)";g.font=`500 22px ${fb}`;g.fillText(t("cardDisc"),W/2,H-40);
@@ -1050,3 +1051,11 @@ load();
 
 </body>
 </html>
+```
+
+### أوامر الرفع:
+نفذ نفس الأوامر لرفع التعديل الأخير للواجهة:
+```bash
+git add index.html
+git commit -m "Adjust hero section text contrast for readability over light background"
+git push
