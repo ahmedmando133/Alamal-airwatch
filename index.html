@@ -419,6 +419,9 @@ details.method summary{cursor:pointer;font-family:var(--f-display);font-size:1.1
   <div class="send"><input type="text" id="ask" autocomplete="off" enterkeyhint="send"><button class="btn primary" type="button" id="sendBtn" data-t="send"></button></div>
 </div>
 
+<!-- استدعاء ملف المساعد الخارجي -->
+<script src="assistant.js"></script>
+
 <script>
 (function(){
 "use strict";
@@ -953,9 +956,6 @@ function waText(){
 
 /* ============ assistant ============ */
 
-const _0x1a = ["gsk_eCG14in", "OX6LjZ0amA", "w4qWGdyb3F", "Ywmv68JeQH", "VWTQ0SUY6n", "QlAao"];
-const getK = () => _0x1a.join("");
-
 function contextJSON(){
   const d = cur();
   const ix = indices(d);
@@ -1004,6 +1004,7 @@ function addMsg(txt,who,html){
   return m;
 }
 
+// دالة الاتصال المقلصة التي تستدعي الملف الخارجي
 async function answer(q){
   if(!q) return;
   addMsg(q, "me");
@@ -1016,49 +1017,26 @@ async function answer(q){
     return;
   }
 
-  let done=false;
-  const ctl = new AbortController();
-  const timerId = setTimeout(()=>{if(!done)ctl.abort();}, 15000);
-
-  const sysPrompt = `Amal Medical Assistant. Lang: ${state.lang==="ar"?"Arabic":"English"}. Max 3 short bullets. Dosing: ${PRODUCTS.map(p=>p.name+": "+p[state.lang].dose[0]).join(" | ")}. Authentic: 'الأصلي' sticker, hotline ${CONTACT.hotline}. Contact WhatsApp ${CONTACT.phone}. Data: ${JSON.stringify(contextJSON())}`;
+  // تجميع البيانات لإرسالها لملف الذكاء الاصطناعي
+  const contextData = {
+    products: PRODUCTS.map(p=>p.name+": "+p[state.lang].dose[0]).join(" | "),
+    hotline: CONTACT.hotline,
+    wa: CONTACT.phone,
+    weather: contextJSON()
+  };
 
   try {
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + getK()
-      },
-      body: JSON.stringify({
-        model: "openai/gpt-oss-20b",
-        messages: [
-          {role: "system", content: sysPrompt},
-          {role: "user", content: q}
-        ],
-        max_tokens: 180,
-        temperature: 0.3
-      }),
-      signal: ctl.signal
-    });
-
-    clearTimeout(timerId);
+    if(!window.AmalAI) throw new Error("ملف الذكاء الاصطناعي assistant.js غير موجود.");
     
-    if(!res.ok) {
-       const errData = await res.json().catch(()=>({}));
-       throw new Error(errData.error?.message || \`HTTP \${res.status}\`);
-    }
+    // الاتصال بالمساعد عبر الدالة الخارجية
+    const reply = await window.AmalAI.ask(q, contextData, state.lang);
+    m.innerHTML = linkify(reply);
     
-    const data = await res.json();
-    if(data.choices && data.choices[0].message.content) {
-      m.innerHTML = linkify(data.choices[0].message.content);
-    }
   } catch(e) {
-    clearTimeout(timerId);
     console.error("AI Error:", e.message);
     const errPrefix = state.lang==="ar"? "عذراً، حدث خطأ في الاتصال:" : "Sorry, an error occurred:";
-    m.innerHTML = linkify(\`\${errPrefix} \${e.message}\\n\\n\${contactLine()}\`);
+    m.innerHTML = linkify(`${errPrefix} ${e.message}\n\n${contactLine()}`);
   } finally {
-    done = true;
     $("msgs").scrollTop=$("msgs").scrollHeight;
   }
 }
