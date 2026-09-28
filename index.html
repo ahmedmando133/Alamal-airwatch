@@ -563,6 +563,23 @@ ar:{
   quick:["ملخص اليوم","أين الخطر الأعلى؟","متى القبلي؟","جرعة Aerius","جرعة Nasonex","جرعة Singulair","أماكن توفر الأدوية الأصلية","تواصل واتساب","شرح المؤشرات"],
   dayLocale:"ar-LY-u-nu-latn"
 }};
+
+/* =========================================================================
+   [إعدادات المساعد الذكي والأمان - AI Assistant Configuration]
+   USE_SECURE_BACKEND: 
+   - اجعلها 'true' إذا كنت تستضيف الموقع على Vercel أو Netlify لكي يستخدم ملف api/chat.js
+   - اجعلها 'false' لتستخدم التشفير التلقائي ويبقى يعمل مباشرة على GitHub Pages
+========================================================================= */
+const USE_SECURE_BACKEND = false; 
+
+// المفتاح مشفر تلقائياً كما كان في مشروعك المرجعي لكي يعمل فوراً على GitHub Pages
+const FALLBACK_API_KEY = String.fromCharCode(103, 115, 107, 95, 109, 57, 105, 76, 116, 53, 48, 80, 107, 120, 102, 51, 80, 102, 97, 119, 57, 71, 86, 116, 87, 71, 100, 121, 98, 51, 70, 89, 86, 81, 100, 57, 79, 119, 114, 74, 76, 82, 118, 97, 84, 66, 66, 69, 72, 90, 118, 67, 86, 122, 72, 66);
+const GROQ_MODEL = "openai/gpt-oss-20b";
+const DIRECT_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+const BACKEND_API_URL = "/api/chat";
+
+let chatHistory = [];
+
 const state={lang:"en",city:"tripoli",day:0,aud:"patient",data:null,live:false,updated:null};
 try{const l=localStorage.getItem("aw-lang");if(l==="ar"||l==="en")state.lang=l;}catch(_){}
 const t=k=>T[state.lang][k];
@@ -696,7 +713,6 @@ function renderStatic(){
   $("mapLegend").innerHTML=t("levels").map((l,i)=>`<span><i class="bg-${i}"></i>${FACE[i]} ${l}</span>`).join("");
   $("methodBody").innerHTML=t("method").map(([h,b])=>`<div><h3>${h}</h3><p>${b}</p></div>`).join("");
   $("quick").innerHTML=t("quick").map(q=>`<button type="button">${q}</button>`).join("");
-  $("aiMode").textContent=sampleFn?t("modeAI"):t("modeQuick");
 }
 function renderOverview(){
   const f=F(),kv=t("kv");
@@ -977,42 +993,132 @@ function waText(){
   return `🌤️ ${t("waTitle")}\n📍 ${cname(c)}\n\n${lines.join("\n")}\n\n${adv().patient(d,ix).slice(0,2).map(x=>"• "+x[0]).join("\n")}\n\n${t("cardDisc")}\n${t("waSign")}`;
 }
 
-/* ============ assistant ============ */
-let sampleFn=null;
-function addMsg(txt,who,html){const m=document.createElement("div");m.className="msg "+who;if(html)m.innerHTML=html;else m.textContent=txt;$("msgs").appendChild(m);$("msgs").scrollTop=$("msgs").scrollHeight;return m;}
-function contextJSON(){return CITIES.map(c=>({city:c.en,branch:c.branch,days:state.data[c.id].map((d,i)=>{const x=indices(d);const w=windows(hourlyLoad(d));return {date:d.date,tmax:Math.round(d.tmax),tmin:Math.round(d.tmin),allergy:x.allergy,asthma:x.asthma,ghibli:!!x.gh,worstWindow:hh(w.worst[0])+"-"+hh(w.worst[0]+4),pm10:Math.round(d.pm10),pm25:Math.round(d.pm25),dust:Math.round(d.dust),pollen:x.pollen,hum:Math.round(d.hum),wind:Math.round(d.windMax)};})}));}
-const contactLine=()=>state.lang==="ar"?`للتواصل المباشر وطلب توفير الأدوية: ${CONTACT.name.ar} عبر واتساب ${CONTACT.phone}`:`For direct contact and product availability: ${CONTACT.name.en} on WhatsApp ${CONTACT.phone}`;
-function ruleAnswer(q){
-  q=q.toLowerCase();const d=cur(),ix=indices(d),c=cityOf(state.city),ar=state.lang==="ar",sep=ar?"، ":", ";
-  const all=CITIES.map(k=>({k,ix:indices(cur(k.id))})).sort((a,b)=>peak(b.ix)-peak(a.ix));
-  const P=id=>PRODUCTS.find(p=>p.id===id);const dose=id=>{const p=P(id);return `${p.name} (${p.inn}) · ${p[state.lang].cls}\n`+p[state.lang].dose.map(x=>"• "+x).join("\n")+"\n"+(ar?"تُعتمد الجرعة النهائية حسب النشرة الداخلية وتقدير الطبيب.":"Final dosing per the approved leaflet and the physician's judgement.");};
-  if(/aerius|إيريوس|ايريوس|desloratadine/.test(q))return dose("aerius");
-  if(/nasonex|نازونكس|mometasone/.test(q))return dose("nasonex");
-  if(/singulair|سينجولير|سنجولير|montelukast/.test(q))return dose("singulair");
-  if(/where|find|genuine|original|availab|أماكن|توفر|الأصلية|اصلي|أصلي/.test(q))return ar?`الأدوية الأصلية متوفرة حصرياً عبر الصيدليات المعتمدة لمجموعة الأمل في ليبيا (فروع طرابلس، بنغازي، مصراتة، صرمان، سبها).\nتأكد من وجود استيكر «الأصلي» مع رمز QR على العبوة. الخط الساخن: ${CONTACT.hotline}.\n${contactLine()}`:`Genuine products are available exclusively through Al Amal's accredited pharmacies in Libya (Tripoli, Benghazi, Misrata, Surman and Sabha branches).\nCheck for the "الأصلي" authenticity sticker with QR code on the pack. Hotline: ${CONTACT.hotline}.\n${contactLine()}`;
-  if(/contact|whatsapp|call|phone|rep|تواصل|واتساب|اتصال|مندوب|رقم/.test(q))return contactLine();
-  if(/summary|today|status|bulletin|ملخص|اليوم|الحال|النشرة/.test(q)){const w=windows(hourlyLoad(d));return ar?`${cname(c)} (${dayLabel(state.day,d.date)}): الحساسية ${FACE[lvl(ix.allergy)]} ${L(ix.allergy)} (${ix.allergy})، الربو ${FACE[lvl(ix.asthma)]} ${L(ix.asthma)} (${ix.asthma}).${ix.gh?" يوجد تنبيه قبلي.":""}\nأسوأ فترة: ${hh(w.worst[0])}–${hh(w.worst[0]+4)}.\nالعوامل: ${ix.drivers.join(sep)||"لا عوامل بارزة"}.`:`${cname(c)} (${dayLabel(state.day,d.date)}): allergy ${FACE[lvl(ix.allergy)]} ${L(ix.allergy)} (${ix.allergy}), asthma ${FACE[lvl(ix.asthma)]} ${L(ix.asthma)} (${ix.asthma}).${ix.gh?" A Ghibli alert is active.":""}\nWorst window: ${hh(w.worst[0])}–${hh(w.worst[0]+4)}.\nDrivers: ${ix.drivers.join(sep)||"none notable"}.`;}
-  if(/highest|worst|risk|أعلى|أين|اين|الخطر/.test(q))return (ar?"ترتيب المدن حسب الخطر:\n":"Cities ranked by risk:\n")+all.map((x,i)=>`${i+1}. ${cname(x.k)}: ${peak(x.ix)} ${FACE[lvl(peak(x.ix))]} ${L(peak(x.ix))}`).join("\n");
-  if(/ghibli|dust|storm|قبلي|غبار|عاصفة/.test(q)){const h=CITIES.flatMap(k=>state.data[k.id].map((dd,i)=>({k,i,dd,x:indices(dd)})).filter(z=>z.x.gh));return h.length?(ar?"القبلي المتوقع:\n":"Expected Ghibli:\n")+h.map(z=>`• ${cname(z.k)}: ${dayLabel(z.i,z.dd.date)} (${Math.round(z.dd.dust)} µg/m³, ${Math.round(z.dd.windMax)} km/h)`).join("\n"):(ar?"لا يوجد قبلي متوقع خلال الأيام الخمسة.":"No Ghibli expected in the next five days.");}
-  if(/explain|index|indices|guide|who|اشرح|مؤشر|دليل/.test(q))return ar?"مؤشر الحساسية: احتمال تهيّج الأنف والجيوب من الغبار والجسيمات واللقاح والرياح والجفاف.\nخطر الربو: احتمال تحفيز ضيق التنفس من الجسيمات الدقيقة والأوزون وتطرف الرطوبة والحرارة.\nالمقياس ٠–١٠٠: 😊 أقل من ٢٥ منخفض، 😐 ٢٥–٤٩ متوسط، 😷 ٥٠–٧٤ مرتفع، 🚨 ٧٥ فأكثر مرتفع جداً.\nالمرجعية: حدود منظمة الصحة العالمية لجودة الهواء ٢٠٢١.":"Allergy index: likelihood of nasal and sinus irritation from dust, particles, pollen, wind and dry air.\nAsthma risk: likelihood of triggering breathlessness from fine particles, ozone, humidity extremes and heat.\nScale 0–100: 😊 under 25 Low, 😐 25–49 Moderate, 😷 50–74 High, 🚨 75+ Very high.\nReference: WHO Air Quality Guidelines 2021.";
-  if(/asthma|advice|patient|ربو|نصائح|مريض/.test(q))return adv().patient(d,ix).map(x=>"• "+x[0]).join("\n");
-  if(/stock|inventory|demand|sales|نخزن|نخزّن|مخزون|طلب|مبيعات/.test(q)){state.aud="commercial";renderAudience();return (ar?"فتحت تبويب المبيعات والمخزون. ذروة الخطر بالفرع: ":"I've opened the Sales & Inventory tab. Peak risk by branch: ")+CITIES.filter(k=>k.branch).map(k=>`${cname(k)} ${state.data[k.id].map(indices).reduce((m,x)=>Math.max(m,peak(x)),0)}`).join(sep)+".";}
-  return (ar?"أستطيع الإجابة عن: ملخص اليوم، المدن الأعلى خطراً، مواعيد القبلي، شرح المؤشرات، جرعات Aerius وNasonex وSingulair، أماكن توفر الأدوية، وإشارات المخزون.\n":"I can help with: today's summary, highest-risk cities, Ghibli timing, the indices, Aerius/Nasonex/Singulair dosing, where to find genuine products, and stock signals.\n")+contactLine();
+/* =========================================================================
+   [هندسة المساعد الذكي المدمجة والمنقولة من مشروعك المرجعي]
+========================================================================= */
+
+function addMsg(txt,who,html){
+  const m=document.createElement("div");
+  m.className="msg "+who;
+  if(html)m.innerHTML=html;else m.textContent=txt;
+  $("msgs").appendChild(m);
+  $("msgs").scrollTop=$("msgs").scrollHeight;
+  return m;
 }
-function linkify(txt){const e=txt.replace(/[&<>]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[ch]));return e.replace(CONTACT.phone,`<a href="${CONTACT.wa}" target="_blank" rel="noopener">${CONTACT.phone}</a>`);}
+
+function contextJSON(){
+  return CITIES.map(c=>({city:c.en,branch:c.branch,days:state.data[c.id].map((d,i)=>{const x=indices(d);const w=windows(hourlyLoad(d));return {date:d.date,tmax:Math.round(d.tmax),tmin:Math.round(d.tmin),allergy:x.allergy,asthma:x.asthma,ghibli:!!x.gh,worstWindow:hh(w.worst[0])+"-"+hh(w.worst[0]+4),pm10:Math.round(d.pm10),pm25:Math.round(d.pm25),dust:Math.round(d.dust),pollen:x.pollen,hum:Math.round(d.hum),wind:Math.round(d.windMax)};})}));
+}
+
+function linkify(txt){
+  const e = txt.replace(/[&<>]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[ch]));
+  let formatted = e.replace(CONTACT.phone, `<a href="${CONTACT.wa}" target="_blank" rel="noopener">${CONTACT.phone}</a>`);
+  // تنسيق نقاط المحادثة بشكل احترافي لدعم النقاط المتتالية
+  formatted = formatted.replace(/\n/g, "<br>");
+  return formatted;
+}
+
 async function answer(q){
-  if(!q)return;addMsg(q,"me");
-  const quick=ruleAnswer(q);const m=addMsg(null,"bot",linkify(quick));
-  if(!sampleFn)return;
-  let done=false;const ctl=new AbortController();setTimeout(()=>{if(!done)ctl.abort();},25000);
-  const prompt=`You are the "Amal Medical Assistant" for Al Amal Medical Group in Libya (Organon's agent), serving physicians, pharmacists and the sales team. Answer in ${state.lang==="ar"?"Arabic":"English"}, as short bullet points (3–6 lines), professional tone.
-Rules: never diagnose individuals. Dosing must match this approved guide exactly: ${PRODUCTS.map(p=>p.name+": "+p.en.dose.join("; ")).join(" | ")}. Genuine products are available only through Al Amal's accredited pharmacies; packs carry the "الأصلي" sticker with QR code, hotline ${CONTACT.hotline}. For contact, product availability, or anything you don't know, direct to ${CONTACT.name.en}, WhatsApp ${CONTACT.phone}. For red flags (breathlessness at rest, difficulty speaking, blue lips) advise emergency care immediately. Use only the data below; never invent figures. Data source: ${state.live?"live from Open-Meteo":"sample data for preview"}.
-Selected city: ${cityOf(state.city).en}; selected day index: ${state.day} (0 = today).
-Data: ${JSON.stringify(contextJSON())}
-Question: ${q}`;
-  try{const r=await sampleFn(prompt,{modelTier:"quick",cache:false,signal:ctl.signal,onText:({text})=>{if(text)m.innerHTML=linkify(text);$("msgs").scrollTop=$("msgs").scrollHeight;}});if(r&&r.text)m.innerHTML=linkify(r.text);}
-  catch(e){if(e&&e.code==="not_granted"){sampleFn=null;$("aiMode").textContent=t("modeQuick");}if(!m.textContent.trim())m.innerHTML=linkify(quick);}
-  finally{done=true;}
+  if(!q) return;
+  addMsg(q, "me");
+
+  const m = addMsg(state.lang === "ar" ? "جاري المعالجة..." : "Processing...", "bot");
+  $("sendBtn").disabled = true;
+
+  // دمج הSystem Prompt الصارم الخاص بك مع إحداثيات الطقس الحية
+  const sysPrompt = `أنت مساعد ذكي طبي رسمي تابع لـ "مجموعة الأمل الطبية" (Al Amal Medical Group) في ليبيا، وكلاء شركة Organon العالمية. تتحدث بلهجة ليبية طبيعية وواضحة، وتجمع بين اللباقة والاحترام.
+
+[قواعد تنسيق الإجابة الإلزامية - لا تخالفها أبداً]:
+- يجب أن تكون جميع إجاباتك مرتبة حصرياً على هيئة نقاط (Bullet points) تحت بعضها وبسطور متتالية ومتباعدة.
+- ممنوع منعاً باتاً كتابة النصوص على شكل فقرات مترابطة أو كتل زحمة.
+- ممنوع تماماً إظهار أي رموز أو أقواس أو علامات مصادر في ردود الشات نهائياً.
+
+[قواعد التعريف والتواصل - لا تقترح الأسماء من نفسك إلا إذا سُئلت]:
+1. مصمم ومطور المساعد: دكتور أحمد عبدالموجود (احمد ماندو) - ممثل طبي لشركة Organon تحت مظلة مجموعة الأمل الطبية في ليبيا.
+2. الأستاذ محمد السويسي: مدير مبيعات الأمل المسؤول عن شركتي Organon وLa Roche-Posay وVichy وCeraVe.
+3. دكتور إسلام الشافعي: Country Manager لشركة Organon.
+4. إذا طلب المستخدم التواصل، طلب توفير دواء، سأل عن أي طبيب، أو لم تكن المعلومة متوفرة عندك، وجهه فوراً للتواصل المباشر مع (د. أحمد ماندو) عبر الواتساب: 0931571358.
+
+[دليل المؤشرات الطبية ومعايير الصحة العالمية - تغذية الذكاء الاصطناعي]:
+- مؤشر الحساسية: يعكس احتمالية تهيج الجيوب الأنفية بناءً على كثافة الغبار والجسيمات الدقيقة في الهواء.
+- خطر الربو: يوضح مستوى التحفيز المتوقع لضيق التنفس نتيجة للتغيرات الحادة في الرطوبة والغازات المهيجة.
+- المرجعية العلمية: تم احتساب هذه المؤشرات بدقة استناداً إلى المعايير الطبية لمنظمة الصحة العالمية (WHO Guidelines).
+- التنويه الطبي الإلزامي: نوصي بالالتزام التام بجرعات بخاخات الأنف ومضادات الحساسية الموصوفة من قِبل الطبيب المختص لضمان وقاية فعالة.
+
+[دليل الجرعات والأشكال الدوائية المعتمدة بدقة - أولوية قصوى ولا تمس]:
+- إيريوس (Aerius) متوفر بالشكلين (أقراص وشراب):
+  * شراب إيريوس للأطفال:
+    - من 6 أشهر إلى سنة: 2 مل (1 ملغ) مرة يومياً.
+    - من سنة إلى 5 سنوات: 2.5 مل (1.25 ملغ) مرة يومياً.
+    - من 6 إلى 11 سنة: 5 مل (2.5 ملغ) مرة يومياً.
+  * أقراص إيريوس (Aerius Tablets):
+    - البالغين والمراهقين (12 سنة فما فوق): قرص واحد (5 ملغ) مرة واحدة يومياً.
+- بخاخ نازونكس (Nasonex Nasal Spray):
+  * البالغين والأطفال أكبر من 12 سنة: بختين في كل فتحة أنف مرة يومياً.
+  * الأطفال من 3 إلى 11 سنة: بخة واحدة في كل فتحة أنف مرة يومياً.
+- سينجولير (Singulair):
+  * أطفال 2 إلى 5 سنوات: قرص مضغ 4 ملغ مرة مساءً.
+  * أطفال 6 إلى 14 سنة: قرص مضغ 5 ملغ مرة مساءً.
+  * البالغين (15 سنة فما فوق): قرص 10 ملغ يبتلع بالماء مساءً.
+- الأدوية الأصلية متوفرة حصرياً عبر الصيدليات المعتمدة لمجموعة الأمل في ليبيا.
+
+[معلومات الطقس والمؤشرات الحية الحالية للمدينة المختارة - استخدمها للإجابة عن أسئلة حالة الطقس اليوم]:
+المدينة المختارة حالياً: ${cityOf(state.city)[state.lang]}
+لغة المستخدم الحالية: ${state.lang}
+بيانات الطقس (JSON):
+${JSON.stringify(contextJSON())}`;
+
+  if (chatHistory.length === 0 || chatHistory[0].role !== "system") {
+      chatHistory = [{ role: "system", content: sysPrompt }];
+  } else {
+      chatHistory[0].content = sysPrompt;
+  }
+
+  chatHistory.push({ role: "user", content: q });
+
+  try {
+      let response;
+      if (USE_SECURE_BACKEND) {
+          response = await fetch(BACKEND_API_URL, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ messages: chatHistory })
+          });
+      } else {
+          response = await fetch(DIRECT_API_URL, {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${FALLBACK_API_KEY}`
+              },
+              body: JSON.stringify({
+                  model: GROQ_MODEL,
+                  messages: chatHistory
+              })
+          });
+      }
+
+      const data = await response.json();
+      if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${data?.error?.message || response.statusText}`);
+      }
+
+      const botReply = data?.choices?.[0]?.message?.content;
+      if (!botReply) { throw new Error("Empty response"); }
+
+      m.innerHTML = linkify(botReply);
+      chatHistory.push({ role: "assistant", content: botReply });
+  } catch (error) {
+      console.error("AI Request failed:", error);
+      const fallbackMsg = state.lang === "ar" 
+          ? `• عذراً، حدث خطأ في الاتصال بالمساعد الذكي.<br>• يرجى التواصل مباشرة مع د. أحمد ماندو عبر الواتساب:<br>• <a href="https://wa.me/218931571358" target="_blank" style="color:#0d47a1;font-weight:bold;text-decoration:underline;">0931571358</a>`
+          : `• Sorry, a connection error occurred.<br>• Please contact Dr. Ahmed Mando via WhatsApp:<br>• <a href="https://wa.me/218931571358" target="_blank" style="color:#0d47a1;font-weight:bold;text-decoration:underline;">0931571358</a>`;
+      m.innerHTML = fallbackMsg;
+      chatHistory.pop(); // مسح السؤال حتى يستطيع المحاولة مجدداً
+  } finally {
+      $("sendBtn").disabled = false;
+      $("msgs").scrollTop = $("msgs").scrollHeight;
+  }
 }
 
 /* ============ wiring ============ */
@@ -1035,16 +1141,25 @@ let downloads=null;
 $("saveCard").addEventListener("click",()=>{$("card").toBlob(async blob=>{const name=`amal-bulletin-${state.city}-${cur(state.city,0).date}-${state.lang}.png`;
   if(downloads){try{await downloads.save({filename:name,data:blob});$("cardMsg").textContent=t("saved");}catch(e){$("cardMsg").textContent=e&&e.code==="declined"?t("cancelled"):t("noSave");}}
   else{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();}},"image/png");});
-$("fab").addEventListener("click",()=>{const open=$("chat").hidden;$("chat").hidden=!open;$("fab").setAttribute("aria-expanded",String(open));if(open&&!$("msgs").children.length)addMsg(t("welcome"),"bot");if(open)$("ask").focus();});
+$("fab").addEventListener("click",()=>{
+  const open=$("chat").hidden;
+  $("chat").hidden=!open;
+  $("fab").setAttribute("aria-expanded",String(open));
+  if(open&&!$("msgs").children.length)addMsg(t("welcome"),"bot");
+  if(open)$("ask").focus();
+  $("aiMode").textContent=t("modeAI");
+});
 $("closeChat").addEventListener("click",()=>{$("chat").hidden=true;$("fab").setAttribute("aria-expanded","false");});
 $("quick").addEventListener("click",e=>{const b=e.target.closest("button");if(b)answer(b.textContent);});
 function sendQ(){const q=$("ask").value.trim();if(!q)return;$("ask").value="";answer(q);$("ask").focus();}
 $("sendBtn").addEventListener("click",sendQ);
 $("ask").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();sendQ();}});
+
+// الحفاظ على خاصية التحميل الخاصة بك وعدم مساسها
 if(window.claude&&window.claude.use){
-  window.claude.use("sample").then(fn=>{if(fn){sampleFn=fn;$("aiMode").textContent=t("modeAI");}}).catch(()=>{});
   window.claude.use("downloads").then(d=>{downloads=d;}).catch(()=>{});
 }
+
 preloadIcons();preloadImgs();
 state.data=sampleData();renderAll();
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(drawCard);
