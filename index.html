@@ -123,23 +123,27 @@ button:focus-visible,select:focus-visible,input:focus-visible,g[data-city]:focus
 .btn.primary:hover{color:#fff;filter:brightness(1.06)}
 .btn.sm{padding:5px 11px;font-size:.78rem;border-radius:10px}
 
-/* Hero Section */
+/* ---------- Hero Section Text Colors Fixed ---------- */
 .hero{position:relative;padding:34px 30px 60px;overflow:hidden;display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:center}
 @media (max-width:760px){.hero{grid-template-columns:1fr;padding:26px 22px 54px}}
-.hero .eyebrow{color:var(--navy); font-weight: 800;}
-.hero h1{font-size:clamp(2rem,5vw,3rem);font-weight:800;margin-top:6px;color:#fff;font-family:"Cairo",sans-serif; text-shadow: 0 2px 10px rgba(0,0,0,0.15);}
-.hero h1 span{color:#9ecbff}
-.hero .tag{color:var(--navy);font-size:1rem;max-width:58ch;margin-top:10px; font-weight: 700;}
+
+.hero .eyebrow{color:var(--navy); font-weight:800;}
+.hero h1{font-size:clamp(2rem,5vw,3rem);font-weight:800;margin-top:6px;color:#ffffff;font-family:"Cairo",sans-serif; text-shadow: 0 2px 10px rgba(0,0,0,0.2);}
+.hero h1 span{color:#ffffff;}
+.hero .tag{color:var(--navy);font-size:1.05rem;max-width:58ch;margin-top:10px;font-weight:700;}
+
 .hero .waves{position:absolute;left:0;right:0;bottom:-2px;width:100%;height:56px;display:block}
 .hero .orb{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(158,203,255,.45),transparent 65%);filter:blur(30px);pointer-events:none}
 .hero .orb.a{width:420px;height:420px;inset:-200px -120px auto auto}
 .hero .orb.b{width:300px;height:300px;inset:auto auto -180px -80px}
 .hero-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;position:relative;z-index:1}
-.kpi{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:16px;padding:12px 14px;backdrop-filter:blur(8px)}
-.kpi span{display:block;font-size:.7rem;opacity:.9;text-transform:uppercase;letter-spacing:.08em;color:var(--navy); font-weight:800}
-[lang="ar"] .kpi span{letter-spacing:0;font-size:.76rem}
-.kpi b{display:block;font-family:var(--f-mono);font-size:1.5rem;font-weight:800;line-height:1.2;margin-top:2px;color:var(--navy)}
-.kpi small{font-size:.72rem;opacity:.9;color:var(--navy); font-weight:700}
+
+.kpi{background:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.5);border-radius:16px;padding:12px 14px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+.kpi span{display:block;font-size:.7rem;opacity:.9;text-transform:uppercase;letter-spacing:.08em;color:var(--navy);font-weight:800;}
+[lang="ar"] .kpi span{letter-spacing:0;font-size:.76rem;}
+.kpi b{display:block;font-family:var(--f-mono);font-size:1.5rem;font-weight:800;line-height:1.2;margin-top:2px;color:var(--navy);}
+.kpi small{font-size:.72rem;opacity:.9;color:var(--navy);font-weight:700;}
+
 .mast .btn{color:var(--navy)}
 
 .alert{display:flex;gap:14px;align-items:flex-start;border-radius:16px;padding:14px 18px;border-inline-start:6px solid var(--amal-red);box-shadow:var(--shadow)}
@@ -738,7 +742,7 @@ function renderHero(){
   const rd=t("rd");
   $("readings").innerHTML=R(rd.pm10,fmt(d.pm10),"µg/m³",d.pm10>45,rd.aboveWho(45))+R(rd.pm25,fmt(d.pm25),"µg/m³",d.pm25>15,rd.aboveWho(15))+R(rd.dust,fmt(d.dust),"µg/m³",d.dust>80,rd.activeDust)+R(rd.pollen,ix.pollen,"",ix.pollen>=70,rd.highPollen)+R(rd.o3,fmt(d.o3),"µg/m³",d.o3>100,rd.above100)+R(rd.hum,fmt(d.hum),"%",d.hum<30||d.hum>75,d.hum<30?rd.dry:rd.humid)+R(rd.tmax,fmt(d.tmax),"°C",d.tmax>36,rd.hot)+R(rd.uv,fmt(d.uv,1),"",d.uv>=8,rd.vhighUv);
   const load=hourlyLoad(d),w=windows(load);
-  $("hourly").innerHTML=`<div class="hh" dir="${state.lang==="ar"?"rtl":"ltr"}"><span>${t("hourlyTitle")}</span><span>${t("worst")}: <b class="num">${hh(w.worst[0])}–${hh(w.worst[0]+4)}</b> · ${t("best")}: <b class="num">${hh(w.best[0])}–${hh(w.best[0]+4)}</b></span></div><div class="hbars">${load.map((v,h)=>`<i class="bg-${lvl(v)}${h>=w.worst[0]&&h<w.worst[0]+4?" win":""}" style="height:${Math.max(8,v)}%" title="${hh(h)} · ${v}"></i>`).join("")}</div><div class="hlabels">${load.map((_,h)=>`<span>${h}</span>`).join("")}</div>`;
+  $("hourly").innerHTML=`<div class="hh" dir="${state.lang==="ar"?"rtl":"ltr"}"><span>${t("hourlyTitle")}</span><span>${t("worst")}: <b class="num">${hh(w.worst[0])}–${hh(w.worst[0]+4)}</b> · ${t("best")}: <b class="num">${hh(w.best[0])}–${hh(w.best[0]+4)}</b></span></div><div class="hbars">${load.map((v,h)=>`<i class="bg-${lvl(v)}${h>=w.worst[0]&&h<w.worst[0]+4?" win":""}" style="height:${Math.max(8,v)}%" title="${hh(h)} ·${v}"></i>`).join("")}</div><div class="hlabels">${load.map((_,h)=>`<span>${h}</span>`).join("")}</div>`;
   renderChart();
 }
 function renderChart(){
@@ -917,7 +921,7 @@ function drawCard(){
     rows.forEach((r,k)=>{const y=top+284+k*38;g.textAlign=ar?"right":"left";g.fillStyle="#4a5f66";g.font=`600 19px ${fb}`;g.fillText(r[0],ar?x+colW-18:x+18,y);g.textAlign=ar?"left":"right";g.fillStyle="#10242c";g.font="500 21px 'IBM Plex Mono', monospace";g.fillText(String(r[1]),ar?x+18:x+colW-18,y);});
     g.textAlign="center";
     const pillBox=(y,label,val)=>{const l=lvl(val);g.fillStyle=BG[l];roundRect(g,x+12,y,colW-24,70,14);g.fill();g.strokeStyle=COL[l];g.lineWidth=2;g.stroke();g.lineWidth=1;g.fillStyle="#4a5f66";g.font=`600 16px ${fb}`;g.fillText(label,x+colW/2,y+26);g.fillStyle=COL[l];g.font=`800 22px ${fb}`;g.fillText(FACE[l]+" "+t("levels")[l],x+colW/2,y+56);};
-    pillBox(top+390,t("allergyShort"),ix.allergy);pillBox(top+470,t("asthmaRisk"),ix.asthma);
+    pillBox(top+390,t("allergyShort"),ix.allergy);pillBox(top+470,t("asthmaShort"),ix.asthma);
   });
   
   g.fillStyle="rgba(255,255,255,.7)";g.font=`500 22px ${fb}`;g.fillText(t("cardDisc"),W/2,H-40);
@@ -934,86 +938,6 @@ function waText(){
   const lines=days.map((d,i)=>{const x=indices(d);return `${dayShort(i,d.date)} ${Math.round(d.tmax)}°/${Math.round(d.tmin)}° · ${t("allergyShort")} ${FACE[lvl(x.allergy)]} ${L(x.allergy)} · ${t("asthmaShort")} ${FACE[lvl(x.asthma)]} ${L(x.asthma)}${x.gh?" · 🌪️ "+t("ghibli"):""}`;});
   const d=cur(),ix=indices(d);
   return `🌤️ ${t("waTitle")}\n📍 ${cname(c)}\n\n${lines.join("\n")}\n\n${adv().patient(d,ix).slice(0,2).map(x=>"• "+x[0]).join("\n")}\n\n${t("cardDisc")}\n${t("waSign")}`;
-}
-
-/* ============ assistant integration ============ */
-function contextJSON(){
-  const d = cur();
-  const ix = indices(d);
-  const w = windows(hourlyLoad(d));
-  return {
-    city: cname(cityOf(state.city)),
-    date: d.date,
-    allergy: ix.allergy,
-    asthma: ix.asthma,
-    ghibli: !!ix.gh,
-    worstWindow: hh(w.worst[0]) + "-" + hh(w.worst[0] + 4)
-  };
-}
-
-const contactLine=()=>state.lang==="ar"?`للتواصل المباشر وطلب توفير الأدوية: ${CONTACT.name.ar} عبر واتساب ${CONTACT.phone}`:`For direct contact and product availability: ${CONTACT.name.en} on WhatsApp ${CONTACT.phone}`;
-
-function ruleAnswer(q){
-  q=q.toLowerCase();const d=cur(),ix=indices(d),c=cityOf(state.city),ar=state.lang==="ar",sep=ar?"، ":", ";
-  const all=CITIES.map(k=>({k,ix:indices(cur(k.id))})).sort((a,b)=>peak(b.ix)-peak(a.ix));
-  const P=id=>PRODUCTS.find(p=>p.id===id);const dose=id=>{const p=P(id);return `${p.name} (${p.inn}) · ${p[state.lang].cls}\n`+p[state.lang].dose.map(x=>"• "+x).join("\n")+"\n"+(ar?"تُعتمد الجرعة النهائية حسب النشرة الداخلية وتقدير الطبيب.":"Final dosing per the approved leaflet and the physician's judgement.");};
-  if(/aerius|إيريوس|ايريوس|desloratadine/.test(q))return dose("aerius");
-  if(/nasonex|نازونكس|mometasone/.test(q))return dose("nasonex");
-  if(/singulair|سينجولير|سنجولير|montelukast/.test(q))return dose("singulair");
-  if(/where|find|genuine|original|availab|أماكن|توفر|الأصلية|اصلي|أصلي/.test(q))return ar?`الأدوية الأصلية متوفرة حصرياً عبر الصيدليات المعتمدة لمجموعة الأمل في ليبيا.\nتأكد من وجود استيكر «الأصلي» مع رمز QR على العبوة. الخط الساخن: ${CONTACT.hotline}.\n${contactLine()}`:`Genuine products are available exclusively through Al Amal's accredited pharmacies in Libya.\nCheck for the "الأصلي" authenticity sticker with QR code on the pack. Hotline: ${CONTACT.hotline}.\n${contactLine()}`;
-  if(/contact|whatsapp|call|phone|rep|تواصل|واتساب|اتصال|مندوب|رقم/.test(q))return contactLine();
-  if(/summary|today|status|bulletin|ملخص|اليوم|الحال|النشرة/.test(q)){const w=windows(hourlyLoad(d));return ar?`${cname(c)} (${dayLabel(state.day,d.date)}): الحساسية ${FACE[lvl(ix.allergy)]} ${L(ix.allergy)} (${ix.allergy})، الربو ${FACE[lvl(ix.asthma)]} ${L(ix.asthma)} (${ix.asthma}).${ix.gh?" يوجد تنبيه قبلي.":""}\nأسوأ فترة: ${hh(w.worst[0])}–${hh(w.worst[0]+4)}.\nالعوامل: ${ix.drivers.join(sep)||"لا عوامل بارزة"}.`:`${cname(c)} (${dayLabel(state.day,d.date)}): allergy ${FACE[lvl(ix.allergy)]} ${L(ix.allergy)} (${ix.allergy}), asthma ${FACE[lvl(ix.asthma)]} ${L(ix.asthma)} (${ix.asthma}).${ix.gh?" A Ghibli alert is active.":""}\nWorst window: ${hh(w.worst[0])}–${hh(w.worst[0]+4)}.\nDrivers: ${ix.drivers.join(sep)||"none notable"}.`;}
-  if(/highest|worst|risk|أعلى|أين|اين|الخطر/.test(q))return (ar?"ترتيب المدن حسب الخطر:\n":"Cities ranked by risk:\n")+all.map((x,i)=>`${i+1}. ${cname(x.k)}: ${peak(x.ix)} ${FACE[lvl(peak(x.ix))]} ${L(peak(x.ix))}`).join("\n");
-  if(/ghibli|dust|storm|قبلي|غبار|عاصفة/.test(q)){const h=CITIES.flatMap(k=>state.data[k.id].map((dd,i)=>({k,i,dd,x:indices(dd)})).filter(z=>z.x.gh));return h.length?(ar?"القبلي المتوقع:\n":"Expected Ghibli:\n")+h.map(z=>`• ${cname(z.k)}: ${dayLabel(z.i,z.dd.date)} (${Math.round(z.dd.dust)} µg/m³, ${Math.round(z.dd.windMax)} km/h)`).join("\n"):(ar?"لا يوجد قبلي متوقع خلال الأيام الخمسة.":"No Ghibli expected in the next five days.");}
-  if(/explain|index|indices|guide|who|اشرح|مؤشر|دليل/.test(q))return ar?"مؤشر الحساسية: احتمال تهيّج الأنف والجيوب.\nخطر الربو: احتمال تحفيز ضيق التنفس.\nالمقياس ٠–١٠٠: 😊 أقل من ٢٥ منخفض، 😐 ٢٥–٤٩ متوسط، 😷 ٥٠–٧٤ مرتفع، 🚨 ٧٥ فأكثر مرتفع جداً.\nالمرجعية: حدود WHO.":"Allergy index: likelihood of nasal/sinus irritation.\nAsthma risk: likelihood of triggering breathlessness.\nScale 0–100: 😊 <25 Low, 😐 25–49 Moderate, 😷 50–74 High, 🚨 75+ Very high.";
-  if(/asthma|advice|patient|ربو|نصائح|مريض/.test(q))return adv().patient(d,ix).map(x=>"• "+x[0]).join("\n");
-  return null;
-}
-
-function linkify(txt){
-  if(!txt) return "";
-  const e=txt.replace(/[&<>]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[ch]));
-  return e.replace(CONTACT.phone,`<a href="${CONTACT.wa}" target="_blank" rel="noopener">${CONTACT.phone}</a>`);
-}
-
-function addMsg(txt,who,html){
-  const m=document.createElement("div");
-  m.className="msg "+who;
-  if(html) m.innerHTML=html; else m.textContent=txt;
-  $("msgs").appendChild(m);
-  $("msgs").scrollTop=$("msgs").scrollHeight;
-  return m;
-}
-
-async function answer(q){
-  if(!q) return;
-  addMsg(q, "me");
-  
-  const quick = ruleAnswer(q);
-  const m = addMsg(null, "bot", '<span style="opacity:0.6">...</span>');
-  
-  if (quick) {
-    m.innerHTML = linkify(quick);
-    return;
-  }
-
-  const contextData = {
-    products: PRODUCTS.map(p=>p.name+": "+p[state.lang].dose[0]).join(" | "),
-    hotline: CONTACT.hotline,
-    wa: CONTACT.phone,
-    weather: contextJSON()
-  };
-
-  try {
-    const reply = await window.AmalAI.ask(q, contextData, state.lang);
-    m.innerHTML = linkify(reply);
-  } catch(e) {
-    console.error("AI Error:", e.message);
-    const errPrefix = state.lang==="ar"? "عذراً، حدث خطأ في الاتصال:" : "Sorry, an error occurred:";
-    m.innerHTML = linkify(`${errPrefix} ${e.message}\n\n${contactLine()}`);
-  } finally {
-    $("msgs").scrollTop=$("msgs").scrollHeight;
-  }
 }
 
 /* ============ wiring ============ */
@@ -1051,11 +975,3 @@ load();
 
 </body>
 </html>
-```
-
-### أوامر الرفع:
-نفذ نفس الأوامر لرفع التعديل الأخير للواجهة:
-```bash
-git add index.html
-git commit -m "Adjust hero section text contrast for readability over light background"
-git push
