@@ -13,13 +13,11 @@
 /* ===== Al Amal Group identity & Glassmorphism Design ===== */
 :root {
   --amal: #064c86; --amal-2: #2f7cc4; --navy: #053a68; --navy-deep: #03284a; --amal-red: #d32f2f;
-  /* Light Mode Glass Colors */
   --surface: rgba(255, 255, 255, 0.85); 
   --surface-2: rgba(242, 246, 251, 0.85); 
   --line: rgba(217, 227, 239, 0.6);
   --sky: rgba(230, 240, 251, 0.8); 
   --sky-2: rgba(243, 248, 254, 0.8);
-  /* Dark Navy Text for Light Mode */
   --ink: #0f2440; --ink-2: #4a5c78; --ink-3: #7f8fa8;
   --accent: var(--amal); --accent-2: var(--amal-2); --accent-deep: var(--navy); --accent-soft: var(--sky);
   --gold: #f2b84b; --dust: #c27e22; --dust-soft: #f9edd9;
@@ -35,28 +33,6 @@
   --glass-blur: blur(16px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    /* Dark Mode Glass Colors */
-    --surface: rgba(17, 31, 54, 0.85); 
-    --surface-2: rgba(23, 39, 66, 0.85); 
-    --line: rgba(39, 57, 90, 0.6); 
-    --sky: rgba(23, 50, 89, 0.8); 
-    --sky-2: rgba(19, 42, 76, 0.8);
-    /* Light/White Text for Dark Mode */
-    --ink: #e7eef9; --ink-2: #aebbd1; --ink-3: #7f8fa8;
-    --amal: #5aa0ee; --amal-2: #7fb8f5; --navy: #c9dcf6; --navy-deep: #0d3b7a;
-    --accent: var(--amal); --accent-2: var(--amal-2); --accent-deep: #0d3b7a; --accent-soft: #173259;
-    --dust: #e3a74f; --dust-soft: #3a2c17;
-    --ok: #5cc28c; --mod: #e5bb3a; --high: #f08a55; --vhigh: #f06a60;
-    --ok-bg: #15332a; --mod-bg: #3a3214; --high-bg: #3d2418; --vhigh-bg: #40201e;
-    --shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 10px 30px -12px rgba(0, 0, 0, 0.4); 
-    --shadow-lg: 0 24px 60px -20px rgba(0, 0, 0, 0.5);
-    --map-land: rgba(27, 44, 71, 0.85); --map-sea: rgba(15, 31, 56, 0.7);
-  }
-}
-
 [lang="ar"]{--f-display:"Cairo",system-ui,sans-serif;--f-body:"Cairo","Segoe UI",Tahoma,system-ui,sans-serif}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -68,23 +44,10 @@ body {
   position: relative; overflow-x: hidden;
 }
 
-/* ---------- Video Background & Dynamic Overlay ---------- */
+/* ---------- Video Background ---------- */
 .bg-video {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
   object-fit: cover; z-index: -2; pointer-events: none;
-}
-
-.bg-overlay {
-  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-  z-index: -1; pointer-events: none;
-  background: rgba(244, 247, 251, 0.3); 
-  transition: background 0.6s ease;
-}
-
-@media (prefers-color-scheme: dark) {
-  .bg-overlay {
-    background: rgba(10, 21, 38, 0.82); 
-  }
 }
 
 .app{max-width:1200px;margin:0 auto;padding-inline:16px;padding-block:14px 110px;display:flex;flex-direction:column;gap:22px;font-family:var(--f-body);position:relative;z-index:1}
@@ -342,11 +305,10 @@ details.method summary{cursor:pointer;font-family:var(--f-display);font-size:1.1
 
 </head>
 <body>
-<!-- خلفية الفيديو المتحرك بصيغة MP4 مع فلتر الإضاءة الديناميكي -->
+<!-- خلفية الفيديو المتحرك بصيغة MP4 بدون فلتر إضاءة لتبقى مضيئة دائماً -->
 <video autoplay muted loop playsinline preload="auto" class="bg-video" id="bgVideo">
   <source src="assets/background.mp4" type="video/mp4">
 </video>
-<div class="bg-overlay"></div>
 
 <script>
   document.addEventListener("DOMContentLoaded", function() {
@@ -742,7 +704,7 @@ function renderHero(){
   const rd=t("rd");
   $("readings").innerHTML=R(rd.pm10,fmt(d.pm10),"µg/m³",d.pm10>45,rd.aboveWho(45))+R(rd.pm25,fmt(d.pm25),"µg/m³",d.pm25>15,rd.aboveWho(15))+R(rd.dust,fmt(d.dust),"µg/m³",d.dust>80,rd.activeDust)+R(rd.pollen,ix.pollen,"",ix.pollen>=70,rd.highPollen)+R(rd.o3,fmt(d.o3),"µg/m³",d.o3>100,rd.above100)+R(rd.hum,fmt(d.hum),"%",d.hum<30||d.hum>75,d.hum<30?rd.dry:rd.humid)+R(rd.tmax,fmt(d.tmax),"°C",d.tmax>36,rd.hot)+R(rd.uv,fmt(d.uv,1),"",d.uv>=8,rd.vhighUv);
   const load=hourlyLoad(d),w=windows(load);
-  $("hourly").innerHTML=`<div class="hh" dir="${state.lang==="ar"?"rtl":"ltr"}"><span>${t("hourlyTitle")}</span><span>${t("worst")}: <b class="num">${hh(w.worst[0])}–${hh(w.worst[0]+4)}</b> · ${t("best")}: <b class="num">${hh(w.best[0])}–${hh(w.best[0]+4)}</b></span></div><div class="hbars">${load.map((v,h)=>`<i class="bg-${lvl(v)}${h>=w.worst[0]&&h<w.worst[0]+4?" win":""}" style="height:${Math.max(8,v)}%" title="${hh(h)} ·${v}"></i>`).join("")}</div><div class="hlabels">${load.map((_,h)=>`<span>${h}</span>`).join("")}</div>`;
+  $("hourly").innerHTML=`<div class="hh" dir="${state.lang==="ar"?"rtl":"ltr"}"><span>${t("hourlyTitle")}</span><span>${t("worst")}: <b class="num">${hh(w.worst[0])}–${hh(w.worst[0]+4)}</b> · ${t("best")}: <b class="num">${hh(w.best[0])}–${hh(w.best[0]+4)}</b></span></div><div class="hbars">${load.map((v,h)=>`<i class="bg-${lvl(v)}${h>=w.worst[0]&&h<w.worst[0]+4?" win":""}" style="height:${Math.max(8,v)}%" title="${hh(h)} · ${v}"></i>`).join("")}</div><div class="hlabels">${load.map((_,h)=>`<span>${h}</span>`).join("")}</div>`;
   renderChart();
 }
 function renderChart(){
@@ -938,6 +900,86 @@ function waText(){
   const lines=days.map((d,i)=>{const x=indices(d);return `${dayShort(i,d.date)} ${Math.round(d.tmax)}°/${Math.round(d.tmin)}° · ${t("allergyShort")} ${FACE[lvl(x.allergy)]} ${L(x.allergy)} · ${t("asthmaShort")} ${FACE[lvl(x.asthma)]} ${L(x.asthma)}${x.gh?" · 🌪️ "+t("ghibli"):""}`;});
   const d=cur(),ix=indices(d);
   return `🌤️ ${t("waTitle")}\n📍 ${cname(c)}\n\n${lines.join("\n")}\n\n${adv().patient(d,ix).slice(0,2).map(x=>"• "+x[0]).join("\n")}\n\n${t("cardDisc")}\n${t("waSign")}`;
+}
+
+/* ============ assistant integration ============ */
+function contextJSON(){
+  const d = cur();
+  const ix = indices(d);
+  const w = windows(hourlyLoad(d));
+  return {
+    city: cname(cityOf(state.city)),
+    date: d.date,
+    allergy: ix.allergy,
+    asthma: ix.asthma,
+    ghibli: !!ix.gh,
+    worstWindow: hh(w.worst[0]) + "-" + hh(w.worst[0] + 4)
+  };
+}
+
+const contactLine=()=>state.lang==="ar"?`للتواصل المباشر وطلب توفير الأدوية: ${CONTACT.name.ar} عبر واتساب ${CONTACT.phone}`:`For direct contact and product availability: ${CONTACT.name.en} on WhatsApp ${CONTACT.phone}`;
+
+function ruleAnswer(q){
+  q=q.toLowerCase();const d=cur(),ix=indices(d),c=cityOf(state.city),ar=state.lang==="ar",sep=ar?"، ":", ";
+  const all=CITIES.map(k=>({k,ix:indices(cur(k.id))})).sort((a,b)=>peak(b.ix)-peak(a.ix));
+  const P=id=>PRODUCTS.find(p=>p.id===id);const dose=id=>{const p=P(id);return `${p.name} (${p.inn}) · ${p[state.lang].cls}\n`+p[state.lang].dose.map(x=>"• "+x).join("\n")+"\n"+(ar?"تُعتمد الجرعة النهائية حسب النشرة الداخلية وتقدير الطبيب.":"Final dosing per the approved leaflet and the physician's judgement.");};
+  if(/aerius|إيريوس|ايريوس|desloratadine/.test(q))return dose("aerius");
+  if(/nasonex|نازونكس|mometasone/.test(q))return dose("nasonex");
+  if(/singulair|سينجولير|سنجولير|montelukast/.test(q))return dose("singulair");
+  if(/where|find|genuine|original|availab|أماكن|توفر|الأصلية|اصلي|أصلي/.test(q))return ar?`الأدوية الأصلية متوفرة حصرياً عبر الصيدليات المعتمدة لمجموعة الأمل في ليبيا.\nتأكد من وجود استيكر «الأصلي» مع رمز QR على العبوة. الخط الساخن: ${CONTACT.hotline}.\n${contactLine()}`:`Genuine products are available exclusively through Al Amal's accredited pharmacies in Libya.\nCheck for the "الأصلي" authenticity sticker with QR code on the pack. Hotline: ${CONTACT.hotline}.\n${contactLine()}`;
+  if(/contact|whatsapp|call|phone|rep|تواصل|واتساب|اتصال|مندوب|رقم/.test(q))return contactLine();
+  if(/summary|today|status|bulletin|ملخص|اليوم|الحال|النشرة/.test(q)){const w=windows(hourlyLoad(d));return ar?`${cname(c)} (${dayLabel(state.day,d.date)}): الحساسية ${FACE[lvl(ix.allergy)]} ${L(ix.allergy)} (${ix.allergy})، الربو ${FACE[lvl(ix.asthma)]} ${L(ix.asthma)} (${ix.asthma}).${ix.gh?" يوجد تنبيه قبلي.":""}\nأسوأ فترة: ${hh(w.worst[0])}–${hh(w.worst[0]+4)}.\nالعوامل: ${ix.drivers.join(sep)||"لا عوامل بارزة"}.`:`${cname(c)} (${dayLabel(state.day,d.date)}): allergy ${FACE[lvl(ix.allergy)]} ${L(ix.allergy)} (${ix.allergy}), asthma ${FACE[lvl(ix.asthma)]} ${L(ix.asthma)} (${ix.asthma}).${ix.gh?" A Ghibli alert is active.":""}\nWorst window: ${hh(w.worst[0])}–${hh(w.worst[0]+4)}.\nDrivers: ${ix.drivers.join(sep)||"none notable"}.`;}
+  if(/highest|worst|risk|أعلى|أين|اين|الخطر/.test(q))return (ar?"ترتيب المدن حسب الخطر:\n":"Cities ranked by risk:\n")+all.map((x,i)=>`${i+1}. ${cname(x.k)}: ${peak(x.ix)} ${FACE[lvl(peak(x.ix))]} ${L(peak(x.ix))}`).join("\n");
+  if(/ghibli|dust|storm|قبلي|غبار|عاصفة/.test(q)){const h=CITIES.flatMap(k=>state.data[k.id].map((dd,i)=>({k,i,dd,x:indices(dd)})).filter(z=>z.x.gh));return h.length?(ar?"القبلي المتوقع:\n":"Expected Ghibli:\n")+h.map(z=>`• ${cname(z.k)}: ${dayLabel(z.i,z.dd.date)} (${Math.round(z.dd.dust)} µg/m³, ${Math.round(z.dd.windMax)} km/h)`).join("\n"):(ar?"لا يوجد قبلي متوقع خلال الأيام الخمسة.":"No Ghibli expected in the next five days.");}
+  if(/explain|index|indices|guide|who|اشرح|مؤشر|دليل/.test(q))return ar?"مؤشر الحساسية: احتمال تهيّج الأنف والجيوب.\nخطر الربو: احتمال تحفيز ضيق التنفس.\nالمقياس ٠–١٠٠: 😊 أقل من ٢٥ منخفض، 😐 ٢٥–٤٩ متوسط، 😷 ٥٠–٧٤ مرتفع، 🚨 ٧٥ فأكثر مرتفع جداً.\nالمرجعية: حدود WHO.":"Allergy index: likelihood of nasal/sinus irritation.\nAsthma risk: likelihood of triggering breathlessness.\nScale 0–100: 😊 <25 Low, 😐 25–49 Moderate, 😷 50–74 High, 🚨 75+ Very high.";
+  if(/asthma|advice|patient|ربو|نصائح|مريض/.test(q))return adv().patient(d,ix).map(x=>"• "+x[0]).join("\n");
+  return null;
+}
+
+function linkify(txt){
+  if(!txt) return "";
+  const e=txt.replace(/[&<>]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[ch]));
+  return e.replace(CONTACT.phone,`<a href="${CONTACT.wa}" target="_blank" rel="noopener">${CONTACT.phone}</a>`);
+}
+
+function addMsg(txt,who,html){
+  const m=document.createElement("div");
+  m.className="msg "+who;
+  if(html) m.innerHTML=html; else m.textContent=txt;
+  $("msgs").appendChild(m);
+  $("msgs").scrollTop=$("msgs").scrollHeight;
+  return m;
+}
+
+async function answer(q){
+  if(!q) return;
+  addMsg(q, "me");
+  
+  const quick = ruleAnswer(q);
+  const m = addMsg(null, "bot", '<span style="opacity:0.6">...</span>');
+  
+  if (quick) {
+    m.innerHTML = linkify(quick);
+    return;
+  }
+
+  const contextData = {
+    products: PRODUCTS.map(p=>p.name+": "+p[state.lang].dose[0]).join(" | "),
+    hotline: CONTACT.hotline,
+    wa: CONTACT.phone,
+    weather: contextJSON()
+  };
+
+  try {
+    const reply = await window.AmalAI.ask(q, contextData, state.lang);
+    m.innerHTML = linkify(reply);
+  } catch(e) {
+    console.error("AI Error:", e.message);
+    const errPrefix = state.lang==="ar"? "عذراً، حدث خطأ في الاتصال:" : "Sorry, an error occurred:";
+    m.innerHTML = linkify(`${errPrefix} ${e.message}\n\n${contactLine()}`);
+  } finally {
+    $("msgs").scrollTop=$("msgs").scrollHeight;
+  }
 }
 
 /* ============ wiring ============ */
