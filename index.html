@@ -91,8 +91,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,g[data-city]:focus
 @media (max-width:760px){.hero{grid-template-columns:1fr;padding:26px 22px 54px}}
 
 .hero .eyebrow{color:var(--navy); font-weight:800;}
-.hero h1{font-size:clamp(2rem,5vw,3rem);font-weight:800;margin-top:6px;color:#ffffff;font-family:"Cairo",sans-serif; text-shadow: 0 2px 10px rgba(0,0,0,0.2);}
-.hero h1 span{color:#ffffff;}
+.hero h1{font-size:clamp(2rem,5vw,3rem);font-weight:900;margin-top:6px;color:var(--navy);font-family:"Cairo",sans-serif; text-shadow: 0 4px 20px rgba(255,255,255,0.85);}
+.hero h1 span{color:var(--amal);}
 .hero .tag{color:var(--navy);font-size:1.05rem;max-width:58ch;margin-top:10px;font-weight:700;}
 
 .hero .waves{position:absolute;left:0;right:0;bottom:-2px;width:100%;height:56px;display:block}
@@ -160,6 +160,22 @@ button:focus-visible,select:focus-visible,input:focus-visible,g[data-city]:focus
 .panel{border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:16px;box-shadow:var(--shadow)}
 .panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
 .panel-head p{color:var(--ink-3);font-size:.82rem}
+
+/* ---------- Dark Map Panel (خريطة المخاطر الغامقة) ---------- */
+aside.panel.map {
+  background: linear-gradient(135deg, var(--navy-deep), var(--navy));
+  border: 1px solid var(--navy-deep);
+  --map-sea: rgba(0, 0, 0, 0.15);
+  --map-land: rgba(255, 255, 255, 0.12);
+  --line: rgba(255, 255, 255, 0.08);
+  --ink: #ffffff;
+  --ink-2: #e0e7ff;
+  --ink-3: rgba(255, 255, 255, 0.6);
+  --surface: var(--navy-deep);
+}
+aside.panel.map .panel-head h2 { color: #ffffff; text-shadow: none; }
+aside.panel.map .panel-head p { color: var(--ink-3); text-shadow: none; }
+aside.panel.map .legend { color: rgba(255, 255, 255, 0.85); }
 
 .hero-g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 @media (max-width:560px){.hero-g{grid-template-columns:1fr}}
@@ -727,7 +743,7 @@ function renderMap(){
   const offs={tripoli:[4,-17],zawiya:[0,24],surman:[-6,24],misrata:[10,-15],benghazi:[0,-15],sabha:[0,24]};
   let dots="";
   CITIES.forEach(c=>{const ix=indices(cur(c.id));const l=lvl(peak(ix));const X=px(pos[c.id][0]),Y=py(pos[c.id][1]);const sel=c.id===state.city;const o=offs[c.id];
-    dots+=`<g data-city="${c.id}" style="cursor:pointer" tabindex="0" role="button" aria-label="${cname(c)}">${ix.gh?`<circle cx="${X}" cy="${Y}" r="15" fill="var(--dust)" opacity=".25"/>`:""}<circle cx="${X}" cy="${Y}" r="${sel?9:7}" fill="${COL[l]}" stroke="var(--surface)" stroke-width="2.5"/>${sel?`<circle cx="${X}" cy="${Y}" r="13" fill="none" stroke="var(--ink)" stroke-width="1.5"/>`:""}<text x="${X+o[0]}" y="${Y+o[1]}" font-size="12" fill="var(--ink)" text-anchor="middle" font-weight="${sel?700:500}" paint-order="stroke" stroke="var(--map-land)" stroke-width="3">${cname(c)}</text></g>`;});
+    dots+=`<g data-city="${c.id}" style="cursor:pointer" tabindex="0" role="button" aria-label="${cname(c)}">${ix.gh?`<circle cx="${X}" cy="${Y}" r="15" fill="var(--dust)" opacity=".25"/>`:""}<circle cx="${X}" cy="${Y}" r="${sel?9:7}" fill="${COL[l]}" stroke="var(--surface)" stroke-width="2.5"/>${sel?`<circle cx="${X}" cy="${Y}" r="13" fill="none" stroke="var(--ink)" stroke-width="1.5"/>`:""}<text x="${X+o[0]}" y="${Y+o[1]}" font-size="12" fill="var(--ink)" text-anchor="middle" font-weight="${sel?700:500}" paint-order="stroke" stroke="var(--surface)" stroke-width="3">${cname(c)}</text></g>`;});
   $("map").innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" direction="ltr"><rect width="${W}" height="${H}" rx="12" fill="var(--map-sea)"/><polygon points="${poly}" fill="var(--map-land)" stroke="var(--line)" stroke-width="1.5"/><text x="${px(18.5)}" y="${py(33.2)}" font-size="11" fill="var(--ink-3)" text-anchor="middle">${t("sea")}</text><text x="${px(18)}" y="${py(25)}" font-size="11" fill="var(--ink-3)" text-anchor="middle">${t("sahara")}</text>${dots}</svg>`;
 }
 function renderBanner(){
